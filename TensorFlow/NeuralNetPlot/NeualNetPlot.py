@@ -22,9 +22,9 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
     return outputs
 
 # Make up some real data
-x_data = np.linspace(-1, 1, 300)[:, np.newaxis]
+x_data = np.linspace(-2 * 3.14, 10 * 3.14, 2000)[:, np.newaxis]
 noise = np.random.normal(0, 0.05, x_data.shape)
-y_data = np.square(x_data) - 0.5 + noise
+y_data = 5 * np.sin(x_data) - 0.5 + noise
 
 ##plt.scatter(x_data, y_data)
 ##plt.show()
@@ -33,13 +33,15 @@ y_data = np.square(x_data) - 0.5 + noise
 xs = tf.placeholder(tf.float32, [None, 1])
 ys = tf.placeholder(tf.float32, [None, 1])
 # add hidden layer
-l1 = add_layer(xs, 1, 10, activation_function=tf.nn.relu)
+l1 = add_layer(xs, 1, 20, activation_function=tf.nn.sigmoid)
+l2 = add_layer(l1, 20, 20, activation_function=tf.nn.sigmoid)
+#l3 = add_layer(l2, 40, 20, activation_function=tf.nn.tanh)
 # add output layer
-prediction = add_layer(l1, 10, 1, activation_function=None)
+prediction = add_layer(l2, 20, 1, activation_function=None)
 
 # the error between prediction and real data
 loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys-prediction), reduction_indices=[1]))
-train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
+train_step = tf.train.AdamOptimizer(0.1).minimize(loss)
 # important step
 sess = tf.Session()
 # tf.initialize_all_variables() no long valid from
@@ -58,7 +60,7 @@ plt.ion()
 plt.show()
 
 
-for i in range(1000):
+for i in range(5000):
     # training
     sess.run(train_step, feed_dict={xs: x_data, ys: y_data})
     if i % 50 == 0:
